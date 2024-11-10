@@ -16,13 +16,14 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const corsOptions = {
-  origin: 'https://dreamify-sigma.vercel.app', 
+  origin: process.env.FRONTEND_URL || 'https://dreamify-sigma.vercel.app', 
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 };
+app.use(cors(corsOptions));
 
-app.use(express.urlencoded({ extended: false }));
-app.use(cors(corsOptions)); 
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: false })); 
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -31,6 +32,14 @@ cloudinary.config({
 });
 
 app.use('/', ImageRouter);
+
+app.use((err, req, res, next) => {
+  if (err instanceof cors.CorsError) {
+    res.status(500).json({ message: "CORS Error" });
+  } else {
+    next(err);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
