@@ -7,48 +7,46 @@ async function GenerateImage(req, res) {
     const prompt = req.query.prompt || "default prompt";
     console.log(`Generating image for prompt: "${prompt}"`);
 
-    // Fetch image data from Pollinations
-    const response = await axios.get(`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`, {
-      responseType: "arraybuffer",
-    });
+    const pollinationUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
+    const response = await axios.get(pollinationUrl, { responseType: "arraybuffer" });
 
     if (response.status !== 200) {
       console.error("Pollinations API returned a non-200 response");
-      return res.status(500).send("Failed to fetch image from Pollinations");
+      return res.status(500).json({ message: "Failed to fetch image from Pollinations" });
     }
-
-    console.log("Image data fetched from Pollinations");
+    console.log("Image data successfully fetched from Pollinations");
 
     const uploadStream = cloudinary.uploader.upload_stream(
-      { resource_type: "image" },
+      { resource_type: "image", secure: true },
       async (error, result) => {
         if (error) {
           console.error("Cloudinary upload failed:", error);
-          return res.status(500).send("Cloudinary upload failed");
+          return res.status(500).json({ message: "Cloudinary upload failed" });
         }
 
         try {
-          const newImage = await Image.create({ url: result.url, prompt: prompt });
-          console.log(`Image saved to MongoDB with URL: ${result.url}`);
-          res.json({ imageUrl: result.url });
+          const newImage = await Image.create({ url: result.secure_url, prompt });
+          console.log(`Image saved to MongoDB with URL: ${result.secure_url}`);
+          return res.json({ imageUrl: result.secure_url });
         } catch (dbError) {
           console.error("Error saving image to MongoDB:", dbError);
-          res.status(500).send("Error saving image to MongoDB");
+          return res.status(500).json({ message: "Error saving image to MongoDB" });
         }
       }
     );
 
     uploadStream.end(response.data);
-
   } catch (error) {
     console.error("Error generating or uploading image:", error);
-    res.status(500).send("Error generating or uploading image");
+    return res.status(500).json({ message: "Error generating or uploading image" });
   }
 }
 
+module.exports = GenerateImage;
+
+
 async function GetPosts(req, res) {
   try {
-    // Fetch images in reverse order (newest first)
     const allUrls = await Image.find({}).sort({ _id: -1 });
     return res.json(allUrls);
   } catch (error) {
