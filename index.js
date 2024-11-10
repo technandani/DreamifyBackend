@@ -10,14 +10,19 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
+const corsOptions = {
+  origin: 'https://dreamify-git-main-nandanis-projects-6ea5e9ab.vercel.app/', 
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+};
+
 app.use(express.urlencoded({ extended: false }));
-app.use(cors());
+app.use(cors(corsOptions)); 
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -25,7 +30,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-app.use('/', ImageRouter);  
+app.use('/', ImageRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
