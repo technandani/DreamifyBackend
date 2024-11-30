@@ -100,7 +100,13 @@ async function Login(req, res) {
     const token = setUser(user);
 
     console.log("uid", token);
-    res.cookie("uid", token);
+    res.cookie("uid", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'Strict',
+      path: '/', 
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
 
     return res.status(200).json({
       success: true,
