@@ -99,13 +99,13 @@ async function Login(req, res) {
 
     const token = setUser(user);
 
-    console.log("uid", token);
-        res.cookie("uid", token, {
+    // Set cookie with options for cross-origin support and security
+    res.cookie("uid", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', 
+      secure: process.env.NODE_ENV === 'production', // Only true in production
       sameSite: 'Strict',
-      path: '/', 
-      maxAge: 60 * 60 * 1000, 
+      path: '/', // Cookie is available across the entire domain
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
 
     return res.status(200).json({
@@ -119,5 +119,6 @@ async function Login(req, res) {
     });
   }
 }
+
 
 module.exports = { Register, Login };
