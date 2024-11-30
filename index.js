@@ -20,7 +20,7 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const corsOptions = {
-  origin: "https://dreamify-sigma.vercel.app", 
+  origin: "https://dreamify-sigma.vercel.app/", 
   credentials: true,
 };
 app.use(cors(corsOptions));
