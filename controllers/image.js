@@ -45,9 +45,9 @@ async function GenerateImage(req, res) {
 module.exports = GenerateImage;
 
 
-async function GetPosts(req, res) {
+async function GetGeneratedImage(req, res) {
   try {
-    const allUrls = await Image.find({}).sort({ _id: -1 });
+    const allUrls = await Image.find({});
     return res.json(allUrls);
   } catch (error) {
     console.error("Error fetching images:", error);
@@ -56,4 +56,4 @@ async function GetPosts(req, res) {
 }
 
 
-module.exports = { GenerateImage, GetPosts };
+module.exports = { GenerateImage, GetGeneratedImage };

@@ -1,10 +1,10 @@
 const express = require('express');
-const { GenerateImage, GetPosts } = require('../controllers/image');
+const { GenerateImage, GetGeneratedImage } = require('../controllers/image');
 const router = express.Router();
 
 router.use(express.urlencoded({ extended: false }));
 
 router.route('/generate-image').get(GenerateImage);  
-router.route('/images').get(GetPosts);    
+router.route('/allImages').get(GetGeneratedImage);    
 
 module.exports = router;
