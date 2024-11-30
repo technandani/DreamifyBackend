@@ -19,8 +19,6 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
-
 async function Register(req, res) {
   try {
     const { name, email, password } = req.body;
@@ -100,11 +98,11 @@ async function Login(req, res) {
     const token = setUser(user);
 
     res.cookie("uid", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'None', 
+      httpOnly: true,  
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'None',
       path: '/',
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000,  // 1 hour
     });
 
     return res.status(200).json({
