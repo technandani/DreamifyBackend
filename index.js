@@ -18,13 +18,11 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-
 const corsOptions = {
-  origin: "https://dreamify-sigma.vercel.app", 
-  credentials: true, 
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  origin: "https://dreamify-sigma.vercel.app",
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"], 
 };
-
 
 app.use(cors(corsOptions));
 
@@ -34,8 +32,8 @@ app.use(cookieParser());
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");  
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Credentials", "true"); 
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie"); 
   next();
 });
 
