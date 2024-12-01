@@ -7,6 +7,8 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 
+const secret= "Nandani@123"
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -91,7 +93,7 @@ async function Login(req, res) {
 
     const token = jwt.sign(
       { email: user.email, _id: user._id },
-      process.env.SECRET,
+      secret,
       { expiresIn: "120h" }
     );
 
