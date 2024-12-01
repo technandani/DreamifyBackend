@@ -99,12 +99,11 @@ async function Login(req, res) {
 
     res.cookie('uid', token, {
       httpOnly: true,  
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: 'None', 
-      maxAge: 3600000, 
+      secure: process.env.NODE_ENV === 'production', // Only set secure cookies in production
+      sameSite: 'None', // To support cross-site cookies
+      maxAge: 3600000, // 1 hour
     });
 
-    // Log the cookies after they are set
     console.log("cookie which is requested is: ", req.cookies);
     console.log("cookie which is sent as response: uid =", token);
 
