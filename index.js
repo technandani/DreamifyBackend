@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const ImageRouter = require("./router/image");
 const UserRouter = require("./router/user");
 const PostRouter = require("./router/post");
+// const { restrictToUser } = require("./middlewares/auth"); 
 
 dotenv.config();
 
@@ -19,20 +20,22 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const corsOptions = {
-  origin: "https://dreamify-sigma.vercel.app",  
+  origin: "https://dreamify-sigma.vercel.app", 
   credentials: true,
 };
-
 app.use(cors(corsOptions));
 
-app.use(express.json());
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); 
+app.use(cookieParser()); 
+app.use(express.urlencoded({ extended: false })); 
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");  
+  res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");
   res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   next();
 });
 
@@ -43,8 +46,8 @@ cloudinary.config({
 });
 
 app.use("/image", ImageRouter);
-app.use("/users", UserRouter);
-app.use("/posts", PostRouter);
+app.use("/users", UserRouter); 
+app.use("/posts", PostRouter); 
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

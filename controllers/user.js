@@ -1,8 +1,10 @@
-const { setUser } = require("../service/auth");
+// const { setUser } = require("../service/auth");
 const User = require("../model/user");
 const bcrypt = require('bcryptjs');
 const cloudinary = require("cloudinary").v2; 
 const multer = require("multer");
+const jwt = require("jsonwebtoken");
+const secret = "Nandani@123";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,14 +12,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); 
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + file.originalname); 
-  },
-});
 
 async function Register(req, res) {
   try {
@@ -95,31 +89,22 @@ async function Login(req, res) {
       });
     }
 
-    const token = setUser(user);
+    const token = jwt.sign(
+      { email: user.email, _id: user._id },
+      process.env.SECRET,
+      { expiresIn: '24h' }
+    );
 
-    // res.cookie('uid', token, {
-    //   httpOnly: true,  
-    //   secure: process.env.NODE_ENV === 'production', 
-    //   sameSite: 'None',
-    //   maxAge:12 * 60 * 60 * 1000,
-      
-    // });
-
-    res.cookie('uid', token, {
-      httpOnly: true,  
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: 'None',
-      path: '/',
-      maxAge:12 * 60 * 60 * 1000,
-    });
-
-    console.log("cookie which is requested is: ", req.cookies);
-    console.log("cookie which is send as response is: ", res.cookies);
+    console.log("uid", token);
+    res.cookie("uid", token);
 
     return res.status(200).json({
       success: true,
       message: "User logged in successfully",
-    });
+      token,
+      email,
+      name: user.name
+    })
 
   } catch (error) {
     return res.status(500).json({
