@@ -95,9 +95,6 @@ async function Login(req, res) {
       { expiresIn: '24h' }
     );
 
-    console.log("uid", token);
-    res.cookie("uid", token);
-
     return res.status(200).json({
       success: true,
       message: "User logged in successfully",
