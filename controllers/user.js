@@ -97,10 +97,19 @@ async function Login(req, res) {
 
     const token = setUser(user);
 
+    // res.cookie('uid', token, {
+    //   httpOnly: true,  
+    //   secure: process.env.NODE_ENV === 'production', 
+    //   sameSite: 'None',
+    //   maxAge:12 * 60 * 60 * 1000,
+      
+    // });
+
     res.cookie('uid', token, {
       httpOnly: true,  
       secure: process.env.NODE_ENV === 'production', 
       sameSite: 'None',
+      path: '/',
       maxAge:12 * 60 * 60 * 1000,
     });
 
