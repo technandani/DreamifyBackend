@@ -97,22 +97,16 @@ async function Login(req, res) {
 
     const token = setUser(user);
 
-    // res.cookie('uid', token, {
-    //   httpOnly: true,  
-    //   secure: process.env.NODE_ENV === 'production', 
-    //   sameSite: 'None',
-    //   maxAge:12 * 60 * 60 * 1000,
-      
-    // });
-
     res.cookie('uid', token, {
       httpOnly: true,  
       secure: process.env.NODE_ENV === 'production', 
-      sameSite: 'None',
-      path: '/',
-      maxAge:12 * 60 * 60 * 1000,
+      sameSite: 'None', 
+      path: '/', 
+      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : 'localhost', 
+      maxAge: 12 * 60 * 60 * 1000,
     });
-
+    
+    
     console.log("cookie which is requested is: ", req.cookies);
     console.log("cookie which is send as response is: ", res.cookies);
 

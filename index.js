@@ -18,16 +18,19 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
+
+app.use(cors(corsOptions));
+
 const corsOptions = {
-  origin: "https://dreamify-sigma.vercel.app",  
-  credentials: true,
+  origin: "https://dreamify-sigma.vercel.app", 
+  credentials: true, 
 };
 
 app.use(cors(corsOptions));
 
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");  
