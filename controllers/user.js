@@ -110,6 +110,7 @@ async function Login(req, res) {
       secure: process.env.NODE_ENV === 'production', 
       sameSite: 'None',
       path: '/',
+      domain: '.vercel.app',
       maxAge:12 * 60 * 60 * 1000,
     });
 
