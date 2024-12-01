@@ -101,6 +101,7 @@ async function Login(req, res) {
       httpOnly: true,  
       secure: process.env.NODE_ENV === 'production', 
       sameSite: 'None',
+      path: '/',
       maxAge:12 * 60 * 60 * 1000,
     });
 
@@ -111,6 +112,7 @@ async function Login(req, res) {
       success: true,
       message: "User logged in successfully",
     });
+
   } catch (error) {
     return res.status(500).json({
       success: false,
