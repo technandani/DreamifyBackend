@@ -103,10 +103,10 @@ async function Login(req, res) {
       sameSite: 'None', 
       maxAge: 3600000, 
     });
-    
-    
+
+    // Log the cookies after they are set
     console.log("cookie which is requested is: ", req.cookies);
-    console.log("cookie which is send as response is: ", res.cookies);
+    console.log("cookie which is sent as response: uid =", token);
 
     return res.status(200).json({
       success: true,
