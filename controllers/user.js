@@ -1,10 +1,11 @@
 // const { setUser } = require("../service/auth");
 const User = require("../model/user");
-const bcrypt = require('bcryptjs');
-const cloudinary = require("cloudinary").v2; 
+const bcrypt = require("bcryptjs");
+const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const jwt = require("jsonwebtoken");
-const secret = "Nandani@123";
+const dotenv = require("dotenv");
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -12,11 +13,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
 async function Register(req, res) {
   try {
     const { name, email, password } = req.body;
-    const profilePic = req.file; 
+    const profilePic = req.file;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -39,14 +39,14 @@ async function Register(req, res) {
 
     if (profilePic) {
       const result = await cloudinary.uploader.upload(profilePic.path);
-      profilePicUrl = result.url; 
+      profilePicUrl = result.url;
     }
 
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
-      profilePic: profilePicUrl, 
+      profilePic: profilePicUrl,
     });
 
     return res.status(200).json({
@@ -92,7 +92,7 @@ async function Login(req, res) {
     const token = jwt.sign(
       { email: user.email, _id: user._id },
       process.env.SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: "120h" }
     );
 
     return res.status(200).json({
@@ -100,9 +100,8 @@ async function Login(req, res) {
       message: "User logged in successfully",
       token,
       email,
-      name: user.name
-    })
-
+      name: user.name,
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
