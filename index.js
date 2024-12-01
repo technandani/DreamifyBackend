@@ -1,4 +1,4 @@
-const { setUser } = require("../service/auth");
+const { setUser } = require("./service/auth");
 const User = require("../model/user");
 const bcrypt = require('bcryptjs');
 const cloudinary = require("cloudinary").v2; 
