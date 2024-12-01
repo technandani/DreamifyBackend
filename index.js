@@ -1,8 +1,45 @@
-const { setUser } = require("./service/auth");
-const User = require("../model/user");
-const bcrypt = require('bcryptjs');
-const cloudinary = require("cloudinary").v2; 
-const multer = require("multer");
+const express = require("express");
+const mongoose = require("mongoose");
+const cloudinary = require("cloudinary").v2;
+const dotenv = require("dotenv");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const ImageRouter = require("./router/image");
+const UserRouter = require("./router/user");
+const PostRouter = require("./router/post");
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 5000;
+
+mongoose
+  .connect(process.env.MONGODB_URL)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
+  const corsOptions = {
+    origin: "https://dreamify-sigma.vercel.app", 
+    credentials: true,  
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie", "Accept"], 
+  };
+  
+  app.use(cors(corsOptions));
+  
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");  
+  res.header("Access-Control-Allow-Credentials", "true"); 
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+});
+
+
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,115 +47,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); 
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + file.originalname); 
-  },
+app.use("/image", ImageRouter);
+app.use("/users", UserRouter);
+app.use("/posts", PostRouter);
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
-
-async function Register(req, res) {
-  try {
-    const { name, email, password } = req.body;
-    const profilePic = req.file; 
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
-    }
-
-    const existUser = await User.findOne({ email });
-    if (existUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already present, use another email.",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    let profilePicUrl = "images/user.png";
-
-    if (profilePic) {
-      const result = await cloudinary.uploader.upload(profilePic.path);
-      profilePicUrl = result.url; 
-    }
-
-    const newUser = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      profilePic: profilePicUrl, 
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "User created successfully.",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-}
-
-async function Login(req, res) {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
-    }
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user, Register first",
-      });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: "Password does not match",
-      });
-    }
-
-    const token = setUser(user);
-
-    res.cookie('uid', token, {
-      httpOnly: true,  
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: 'None', 
-      maxAge: 3600000, 
-    });
-
-    // Log the cookies after they are set
-    console.log("cookie which is requested is: ", req.cookies);
-    console.log("cookie which is sent as response: uid =", token);
-
-    return res.status(200).json({
-      success: true,
-      message: "User logged in successfully",
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-}
-
-module.exports = { Register, Login };
