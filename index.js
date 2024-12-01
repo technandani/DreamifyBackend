@@ -18,25 +18,27 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-const corsOptions = {
-  origin: "https://dreamify-sigma.vercel.app",
-  credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"], 
-};
-
-app.use(cors(corsOptions));
+  const corsOptions = {
+    origin: "https://dreamify-sigma.vercel.app", 
+    credentials: true,  
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie", "Accept"], 
+  };
+  
+  app.use(cors(corsOptions));
+  
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");
-  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");  
+  res.header("Access-Control-Allow-Credentials", "true"); 
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cookie");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   next();
 });
+
 
 
 cloudinary.config({

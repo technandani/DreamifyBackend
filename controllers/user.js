@@ -101,9 +101,7 @@ async function Login(req, res) {
       httpOnly: true,  
       secure: process.env.NODE_ENV === 'production', 
       sameSite: 'None', 
-      path: '/', 
-      domain: process.env.NODE_ENV === 'production' ? '.vercel.app' : 'localhost', 
-      maxAge: 12 * 60 * 60 * 1000,
+      maxAge: 3600000, 
     });
     
     
