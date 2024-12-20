@@ -1,11 +1,9 @@
 const express = require("express");
 const { Register, Login } = require("../controllers/user");
+const upload = require("../middlewares/multer");
 const router = express.Router();
 
-const { upload } = require("../service/auth");
-router.use(express.urlencoded({ extended: false }));
-
-router.route('/register').post(upload.single('profilePic'), Register); 
-router.route('/login').post(Login);
+router.post("/register", upload.single("profilePic"), Register);
+router.post("/login", Login);
 
 module.exports = router;
