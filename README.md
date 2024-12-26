@@ -4,7 +4,7 @@ Dreamify is a web application that allows users to generate images using text pr
 
 ## Demo
 
-Click here to view the live demo: [Demo](https://dreamify-git-main-nandanis-projects-6ea5e9ab.vercel.app/)<br>
+Click here to view the live demo: [Demo](https://dreamify-sigma.vercel.app/)<br>
 Backend code: [Backend code](https://github.com/nks854338/DreamifyBackend)<br>
 frontend code: [frontend code](https://github.com/nks854338/Dreamify)<br>
 Click here to view UI/UX design of Dreamify: [Click here](https://www.behance.net/gallery/211666459/Dreamify-AI-Image-Generator-UI-Design)
