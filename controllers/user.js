@@ -1,7 +1,8 @@
+const jwt = require("jsonwebtoken");
 const User = require("../model/user");
 const bcrypt = require("bcryptjs");
 const cloudinary = require("cloudinary").v2;
-const jwt = require("jsonwebtoken");
+const axios = require("axios");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -10,7 +11,89 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
 const secret = "Nandani@123";
+
+const decodeToken = async (token) => {
+  try {
+    // Use Google's token verification endpoint
+    const response = axios.post("http://localhost:5000/users/loginWithGoogle", { token: accessToken }, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true, 
+    });
+    return response.data; 
+  } catch (err) {
+    return null; 
+  }
+};
+
+async function loginWithGoogle(req, res) {
+  console.log("user hit the google login btn");
+  try {
+    const tokenFromCookie = req.cookies.uid;
+    console.log("token is: ", tokenFromCookie);
+
+    let userFromCookie = null;
+    if (tokenFromCookie) {
+      // Decode and verify the Google token
+      userFromCookie = await decodeToken(tokenFromCookie);
+    }
+
+    if (!userFromCookie) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid token or token expired.",
+      });
+    }
+
+    const { email, name, picture } = userFromCookie; // Destructure from decoded token
+    let profilePicUrl = picture || "images/user.png"; // Use picture from Google or fallback to default
+
+    // Check if the user already exists in the database
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      // If user exists, just send the user data (without creating a new user)
+      return res.status(200).json({
+        success: true,
+        message: "User already exists.",
+        data: {
+          name: existingUser.name,
+          email: existingUser.email,
+          profilePic: existingUser.profilePic,
+        },
+      });
+    }
+
+    // If user does not exist, create a new user
+    // For Google login, don't need a password, but you could set a default password or just leave it empty
+    const hashedPassword = await bcrypt.hash(name, 10); // Set a default or random password for Google users
+
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashedPassword, // Placeholder password (can be changed later)
+      profilePic: profilePicUrl,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User created successfully.",
+      data: {
+        name: newUser.name,
+        email: newUser.email,
+        profilePic: newUser.profilePic,
+      },
+    });
+  } catch (error) {
+    console.error("Error during registration:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error during registration.",
+      error: error.message,
+    });
+  }
+}
 
 async function Register(req, res) {
   try {
@@ -42,7 +125,7 @@ async function Register(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let profilePicUrl = "https://res.cloudinary.com/your-cloud-name/image/upload/v1234567890/default-user.png";
+    let profilePicUrl = "images/user.png";
     if (req.file) {
       const cloudinaryResult = await cloudinary.uploader.upload(req.file.path, {
         folder: "users/profile_pics",
@@ -114,6 +197,7 @@ async function Login(req, res) {
       data: {
         email: user.email,
         name: user.name,
+        profilePic: user.profilePic,
       },
     });
   } catch (error) {
@@ -125,4 +209,4 @@ async function Login(req, res) {
   }
 }
 
-module.exports = { Register, Login };
+module.exports = { Register, Login, loginWithGoogle };
