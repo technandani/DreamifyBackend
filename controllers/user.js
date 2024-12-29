@@ -18,68 +18,90 @@ async function loginWithGoogle(req, res) {
   console.log("User hit the Google login button"); // This should print in the server logs
 
   try {
-    const { token } = req.body; // Get token from the request body
-    console.log("Received token:", token); // Log the token to check if it's being sent
+    const { rowtoken } = req.body;
+    console.log("Received token:", rowtoken);
 
-    if (!token) {
-      return res.status(400).json({ success: false, message: "Token is missing" });
+    if (!rowtoken) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Token is missing" });
     }
 
     // Decode and verify the token
     try {
-      const res = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const res = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${rowtoken}`,
+          },
         }
-      })
+      );
       // console.log("user data:", res.data);
       userFromGoogle = res.data;
     } catch (error) {
-      console.log("error: ", error);     
+      console.log("error: ", error);
     }
 
     if (!userFromGoogle) {
-      return res.status(400).json({ success: false, message: "Invalid or expired token" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired token" });
     }
 
     const { email, name, picture } = userFromGoogle;
     let profilePicUrl = picture || "images/user.png";
 
-    console.log("name: " , name);
-    console.log("email: ", email);
-    console.log("profilePic: ",profilePicUrl);
+    // console.log("name: ", name);
+    // console.log("email: ", email);
+    // console.log("profilePic: ", profilePicUrl);
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(200).json({
-        success: true,
-        message: "User already exists.",
+    //cheak user exiest or not
+    const findUser = await User.findOne({ email });
+    
+    if (!findUser) {
+      // If user doesn't exist, create a new user
+      const hashedPassword = await bcrypt.hash(name, 10);
+      const newUser = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        profilePic: profilePicUrl,
       });
     }
+    
+    const user = await User.findOne({ email });
 
-    // If user doesn't exist, create a new user
-    const hashedPassword = await bcrypt.hash(name, 10);
-    const newUser = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      profilePic: profilePicUrl,
-    });
+      const token = jwt.sign(
+        { email: user.email, _id: user._id },
+        secret,
+        {
+          expiresIn: "120h",
+        }
+      );
 
-    return res.status(200).json({
-      success: true,
-      message: "User created successfully.",
-      data: { name: newUser.name, email: newUser.email, profilePic: newUser.profilePic },
-    });
-
+      return res.status(200).json({
+        success: true,
+        message: "Login successful.",
+        token,
+        data: {
+          email: user.email,
+          name: user.name,
+          profilePic: user.profilePic,
+        },
+      });
+      
   } catch (error) {
     console.error("Error during Google login:", error);
-    return res.status(500).json({ success: false, message: "Error during login", error: error.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error during login",
+        error: error.message,
+      });
   }
 }
-
 
 async function Register(req, res) {
   try {
