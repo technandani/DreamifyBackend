@@ -14,86 +14,72 @@ cloudinary.config({
 
 const secret = "Nandani@123";
 
-const decodeToken = async (token) => {
-  try {
-    // Use Google's token verification endpoint
-    const response = axios.post("http://localhost:5000/users/loginWithGoogle", { token: accessToken }, {
-      headers: { "Content-Type": "application/json" },
-      withCredentials: true, 
-    });
-    return response.data; 
-  } catch (err) {
-    return null; 
-  }
-};
-
 async function loginWithGoogle(req, res) {
-  console.log("user hit the google login btn");
+  console.log("User hit the Google login button"); // This should print in the server logs
+
   try {
-    const tokenFromCookie = req.cookies.uid;
-    console.log("token is: ", tokenFromCookie);
+    const { token } = req.body; // Get token from the request body
+    console.log("Received token:", token); // Log the token to check if it's being sent
 
-    let userFromCookie = null;
-    if (tokenFromCookie) {
-      // Decode and verify the Google token
-      userFromCookie = await decodeToken(tokenFromCookie);
+    if (!token) {
+      return res.status(400).json({ success: false, message: "Token is missing" });
     }
 
-    if (!userFromCookie) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid token or token expired.",
-      });
+    // Decode and verify the token
+    try {
+      const res = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      // console.log("user data:", res.data);
+      userFromGoogle = res.data;
+    } catch (error) {
+      console.log("error: ", error);     
     }
 
-    const { email, name, picture } = userFromCookie; // Destructure from decoded token
-    let profilePicUrl = picture || "images/user.png"; // Use picture from Google or fallback to default
+    if (!userFromGoogle) {
+      return res.status(400).json({ success: false, message: "Invalid or expired token" });
+    }
 
-    // Check if the user already exists in the database
+    const { email, name, picture } = userFromGoogle;
+    let profilePicUrl = picture || "images/user.png";
+
+    console.log("name: " , name);
+    console.log("email: ", email);
+    console.log("profilePic: ",profilePicUrl);
+
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      // If user exists, just send the user data (without creating a new user)
       return res.status(200).json({
         success: true,
         message: "User already exists.",
-        data: {
-          name: existingUser.name,
-          email: existingUser.email,
-          profilePic: existingUser.profilePic,
-        },
       });
     }
 
-    // If user does not exist, create a new user
-    // For Google login, don't need a password, but you could set a default password or just leave it empty
-    const hashedPassword = await bcrypt.hash(name, 10); // Set a default or random password for Google users
-
+    // If user doesn't exist, create a new user
+    const hashedPassword = await bcrypt.hash(name, 10);
     const newUser = await User.create({
       name,
       email,
-      password: hashedPassword, // Placeholder password (can be changed later)
+      password: hashedPassword,
       profilePic: profilePicUrl,
     });
 
     return res.status(200).json({
       success: true,
       message: "User created successfully.",
-      data: {
-        name: newUser.name,
-        email: newUser.email,
-        profilePic: newUser.profilePic,
-      },
+      data: { name: newUser.name, email: newUser.email, profilePic: newUser.profilePic },
     });
+
   } catch (error) {
-    console.error("Error during registration:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error during registration.",
-      error: error.message,
-    });
+    console.error("Error during Google login:", error);
+    return res.status(500).json({ success: false, message: "Error during login", error: error.message });
   }
 }
+
 
 async function Register(req, res) {
   try {

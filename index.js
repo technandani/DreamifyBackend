@@ -20,8 +20,9 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const corsOptions = {
-  origin: "http://localhost:5173", 
-  credentials: true,
+  origin: "http://localhost:5173", // Replace with your frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"], // Add any methods you need
+  credentials: true, // Allow cookies to be sent with requests
 };
 app.use(cors(corsOptions));
 
