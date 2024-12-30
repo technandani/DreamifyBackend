@@ -20,7 +20,7 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 const corsOptions = {
-  origin: "http://localhost:5173", // Replace with your frontend URL
+  origin: "https://dreamify-sigma.vercel.app", // Replace with your frontend URL
   methods: ["GET", "POST", "PUT", "DELETE"], // Add any methods you need
   credentials: true, // Allow cookies to be sent with requests
 };
@@ -31,7 +31,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false })); 
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
+  res.header("Access-Control-Allow-Origin", "https://dreamify-sigma.vercel.app");
   res.header("Access-Control-Allow-Credentials", "true");
   res.header(
     "Access-Control-Allow-Headers",
