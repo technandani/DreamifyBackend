@@ -7,7 +7,7 @@ async function GenerateImage(req, res) {
     const prompt = req.query.prompt || "default prompt";
     console.log(`Generating image for prompt: "${prompt}"`);
 
-    const pollinationUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}`;
+    const pollinationUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=800&height=800&seed=42&model=turbo&nologo=true&enhance=false`;
     const response = await axios.get(pollinationUrl, { responseType: "arraybuffer" });
 
     if (response.status !== 200) {
